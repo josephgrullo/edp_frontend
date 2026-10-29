@@ -812,3 +812,667 @@ h1 { margin-bottom: 7px; font-size: clamp(25px, 2.2vw, 31px); line-height: 1.2; 
     padding: 10px 12px;
   }
 }
+
+
+/* ==========================================
+   GEARTRACK - EDIT EQUIPMENT MODAL
+   Supports Light Mode and Dark Mode
+   Paste this at the END of css.css
+   ========================================== */
+
+/* Modal background overlay */
+.inventory-form-overlay,
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+  background: rgba(15, 23, 42, 0.58);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+/* Edit form container */
+.inventory-form,
+.edit-equipment-modal,
+.detail-modal {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 560px;
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
+  padding: 26px;
+  border: 1px solid var(--line-strong);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+  animation: edit-modal-appear 0.2s ease-out;
+}
+
+/* Modal opening animation */
+@keyframes edit-modal-appear {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.99);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Modal heading */
+.inventory-form-heading,
+.edit-modal-heading,
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 22px;
+  padding-bottom: 17px;
+  border-bottom: 1px solid var(--line);
+}
+
+.inventory-form-heading h3,
+.edit-modal-heading h2,
+.modal-head h2 {
+  margin: 0;
+  color: var(--text-strong);
+  font-family: Manrope, sans-serif;
+  font-size: 21px;
+  font-weight: 800;
+  letter-spacing: -0.4px;
+}
+
+/* Close button */
+.inventory-form-heading button,
+.edit-modal-heading button,
+.modal-head .icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-soft);
+  color: var(--muted);
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.inventory-form-heading button:hover,
+.edit-modal-heading button:hover,
+.modal-head .icon-button:hover {
+  background: var(--red-soft);
+  color: var(--red);
+  border-color: var(--line-strong);
+}
+
+/* Form labels */
+.inventory-form > label,
+.edit-equipment-modal > label,
+.edit-form-group label,
+.inventory-form-group label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 17px;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+/* Two-column form layout */
+.inventory-form .inventory-form-grid,
+.edit-equipment-modal .inventory-form-grid,
+.edit-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+/* Input fields and dropdowns */
+.inventory-form input,
+.inventory-form select,
+.edit-equipment-modal input,
+.edit-equipment-modal select,
+.edit-form-group input,
+.edit-form-group select,
+.inventory-form-group input,
+.inventory-form-group select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+/* Input placeholder */
+.inventory-form input::placeholder,
+.edit-equipment-modal input::placeholder,
+.edit-form-group input::placeholder,
+.inventory-form-group input::placeholder {
+  color: var(--muted-2);
+  opacity: 1;
+}
+
+/* Focus state */
+.inventory-form input:focus,
+.inventory-form select:focus,
+.edit-equipment-modal input:focus,
+.edit-equipment-modal select:focus,
+.edit-form-group input:focus,
+.edit-form-group select:focus,
+.inventory-form-group input:focus,
+.inventory-form-group select:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(53, 109, 243, 0.13);
+}
+
+/* Dropdown options */
+.inventory-form select option,
+.edit-equipment-modal select option,
+.edit-form-group select option,
+.inventory-form-group select option {
+  background: var(--surface);
+  color: var(--text);
+}
+
+/* Form action buttons */
+.inventory-form-actions,
+.edit-modal-actions,
+.edit-equipment-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+/* Shared button styling */
+.inventory-form-actions button,
+.edit-modal-actions button,
+.edit-equipment-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 10px 17px;
+  border: 1px solid var(--line-strong);
+  border-radius: 9px;
+  background: var(--surface);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+/* Cancel button */
+.inventory-form-actions button:first-child,
+.edit-modal-actions .cancel-button,
+.edit-equipment-actions .cancel-button {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+
+.inventory-form-actions button:first-child:hover,
+.edit-modal-actions .cancel-button:hover,
+.edit-equipment-actions .cancel-button:hover {
+  background: var(--surface-hover);
+}
+
+/* Save/update button */
+.inventory-form-actions button[type="submit"],
+.edit-modal-actions button[type="submit"],
+.edit-equipment-actions button[type="submit"],
+.inventory-save-button {
+  background: var(--blue);
+  color: #ffffff;
+  border-color: var(--blue);
+  box-shadow: 0 3px 9px rgba(53, 109, 243, 0.15);
+}
+
+.inventory-form-actions button[type="submit"]:hover,
+.edit-modal-actions button[type="submit"]:hover,
+.edit-equipment-actions button[type="submit"]:hover,
+.inventory-save-button:hover {
+  background: var(--blue-dark);
+  border-color: var(--blue-dark);
+}
+
+/* Button click and disabled states */
+.inventory-form-actions button:active,
+.edit-modal-actions button:active,
+.edit-equipment-actions button:active {
+  transform: scale(0.98);
+}
+
+.inventory-form-actions button:disabled,
+.edit-modal-actions button:disabled,
+.edit-equipment-actions button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* Error or success messages inside the form */
+.inventory-form .error-message,
+.edit-equipment-modal .error-message,
+.edit-form-error {
+  margin: 0 0 15px;
+  padding: 11px 13px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--red-soft);
+  color: var(--red);
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.inventory-form .success-message,
+.edit-equipment-modal .success-message {
+  margin-bottom: 15px;
+  padding: 11px 13px;
+  border-radius: 8px;
+  background: var(--green-soft);
+  color: var(--green);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+/* Modal scrolling */
+.inventory-form,
+.edit-equipment-modal,
+.detail-modal {
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+
+.inventory-form::-webkit-scrollbar,
+.edit-equipment-modal::-webkit-scrollbar,
+.detail-modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.inventory-form::-webkit-scrollbar-thumb,
+.edit-equipment-modal::-webkit-scrollbar-thumb,
+.detail-modal::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  background: var(--line-strong);
+}
+
+/* Dark mode adjustments */
+:root[data-theme='dark'] .inventory-form,
+:root[data-theme='dark'] .edit-equipment-modal,
+:root[data-theme='dark'] .detail-modal {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--line);
+}
+
+:root[data-theme='dark'] .inventory-form-heading h3,
+:root[data-theme='dark'] .edit-modal-heading h2,
+:root[data-theme='dark'] .modal-head h2 {
+  color: var(--text-strong);
+}
+
+:root[data-theme='dark'] .inventory-form > label,
+:root[data-theme='dark'] .edit-equipment-modal > label,
+:root[data-theme='dark'] .edit-form-group label,
+:root[data-theme='dark'] .inventory-form-group label {
+  color: var(--text);
+}
+
+:root[data-theme='dark'] .inventory-form input,
+:root[data-theme='dark'] .inventory-form select,
+:root[data-theme='dark'] .edit-equipment-modal input,
+:root[data-theme='dark'] .edit-equipment-modal select,
+:root[data-theme='dark'] .edit-form-group input,
+:root[data-theme='dark'] .edit-form-group select,
+:root[data-theme='dark'] .inventory-form-group input,
+:root[data-theme='dark'] .inventory-form-group select {
+  background: var(--surface-soft);
+  color: var(--text);
+  border-color: var(--line-strong);
+}
+
+/* Mobile layout */
+@media (max-width: 600px) {
+  .inventory-form-overlay,
+  .modal-backdrop {
+    align-items: center;
+    padding: 12px;
+  }
+
+  .inventory-form,
+  .edit-equipment-modal,
+  .detail-modal {
+    width: 100%;
+    max-width: 100%;
+    max-height: calc(100dvh - 24px);
+    padding: 19px;
+    border-radius: 13px;
+  }
+
+  .inventory-form-heading,
+  .edit-modal-heading,
+  .modal-head {
+    margin-bottom: 18px;
+    padding-bottom: 14px;
+  }
+
+  .inventory-form-heading h3,
+  .edit-modal-heading h2,
+  .modal-head h2 {
+    font-size: 18px;
+  }
+
+  .inventory-form .inventory-form-grid,
+  .edit-equipment-modal .inventory-form-grid,
+  .edit-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+
+  .inventory-form-actions,
+  .edit-modal-actions,
+  .edit-equipment-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .inventory-form-actions button,
+  .edit-modal-actions button,
+  .edit-equipment-actions button {
+    width: 100%;
+  }
+}
+
+/* Respect reduced-motion settings */
+@media (prefers-reduced-motion: reduce) {
+  .inventory-form,
+  .edit-equipment-modal,
+  .detail-modal {
+    animation: none;
+  }
+}
+
+
+/* ========================================
+   EDIT EQUIPMENT MODAL
+   ======================================== */
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.58);
+  backdrop-filter: blur(5px);
+  -webkit-backdrop-filter: blur(5px);
+}
+
+.detail-modal {
+  width: 100%;
+  max-width: 580px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.22);
+  animation: editModalAppear 0.2s ease-out;
+}
+
+@keyframes editModalAppear {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Modal heading */
+
+.detail-modal .modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 26px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--line);
+}
+
+.detail-modal .modal-eyebrow {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--blue);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.detail-modal .modal-head h2 {
+  margin: 0;
+  color: var(--text);
+  font-size: 25px;
+  font-weight: 750;
+  line-height: 1.3;
+}
+
+/* Close button */
+
+.detail-modal .icon-button {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+}
+
+.detail-modal .icon-button:hover {
+  background: var(--line);
+  transform: rotate(4deg);
+}
+
+.detail-modal button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* Form fields */
+
+.edit-equipment-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 16px;
+}
+
+.edit-equipment-fields label {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.edit-equipment-fields label:last-child {
+  grid-column: 1 / -1;
+}
+
+.edit-equipment-fields input,
+.edit-equipment-fields select {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 45px;
+  padding: 11px 13px;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  outline: none;
+  font: inherit;
+  font-size: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.edit-equipment-fields input:focus,
+.edit-equipment-fields select:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.14);
+}
+
+.edit-equipment-fields select option {
+  color: var(--text);
+  background: var(--surface);
+}
+
+/* Validation error */
+
+.detail-modal .edit-error {
+  margin: 18px 0 0;
+  padding: 12px 14px;
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.09);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 9px;
+  font-size: 13px;
+}
+
+/* Footer buttons */
+
+.edit-equipment-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.edit-equipment-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 43px;
+  padding: 11px 19px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+}
+
+.edit-equipment-actions button:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.edit-equipment-actions .secondary-button {
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+
+.edit-equipment-actions .secondary-button:hover:not(:disabled) {
+  background: var(--bg);
+}
+
+.edit-equipment-actions .primary-button {
+  color: #ffffff;
+  background: var(--blue);
+  border: 1px solid var(--blue);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.18);
+}
+
+.edit-equipment-actions .primary-button:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+/* Mobile layout */
+
+@media (max-width: 560px) {
+  .modal-backdrop {
+    padding: 12px;
+  }
+
+  .detail-modal {
+    max-height: 92vh;
+    padding: 20px;
+    border-radius: 14px;
+  }
+
+  .detail-modal .modal-head h2 {
+    font-size: 22px;
+  }
+
+  .edit-equipment-fields {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .edit-equipment-fields label:last-child {
+    grid-column: auto;
+  }
+
+  .edit-equipment-actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .edit-equipment-actions button {
+    width: 100%;
+  }
+}
