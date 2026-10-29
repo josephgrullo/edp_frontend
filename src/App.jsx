@@ -12,6 +12,7 @@ import {
   getEquipment,
   getHealth,
   addEquipment,
+  updateEquipment,
   deleteEquipment
 } from './api.js';
 
@@ -102,23 +103,318 @@ function Reports({ equipment, dashboard, loading }) {
   </>;
 }
 
-function DetailModal({ item, onClose }) {
+
+function DetailModal({ item, onClose, onEdit }) {
   useEffect(() => {
     if (!item) return undefined;
-    const handler = event => { if (event.key === 'Escape') onClose(); };
+
+    const handler = (event) => {
+      if (event.key === 'Escape') onClose();
+    };
+
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
   }, [item, onClose]);
+
   if (!item) return null;
+
   const fields = [
-    ['Equipment ID', item.id ?? '—'], ['Category', item.category || 'Uncategorized'], ['Quantity', Number(item.quantity || 0).toLocaleString()], ['Condition', item.item_condition || item.condition || 'Unknown'], ['Location', item.location || 'Not specified'], ['Date added', item.date_added ? new Date(item.date_added).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : '—']
+    ['Equipment ID', item.id ?? '—'],
+    ['Category', item.category || 'Uncategorized'],
+    ['Quantity', Number(item.quantity || 0).toLocaleString()],
+    ['Condition', item.item_condition || item.condition || 'Unknown'],
+    ['Location', item.location || 'Not specified'],
+    [
+      'Date added',
+      item.date_added
+        ? new Date(item.date_added).toLocaleDateString(undefined, {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          })
+        : '—',
+    ],
   ];
-  return <div className="modal-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) onClose(); }}><section className="detail-modal" role="dialog" aria-modal="true" aria-labelledby="detail-title"><div className="modal-head"><div><span className="modal-eyebrow">EQUIPMENT DETAILS</span><h2 id="detail-title">{item.name || 'Equipment record'}</h2></div><button className="icon-button" onClick={onClose} aria-label="Close details"><X size={19} /></button></div><div className="detail-emblem"><Boxes size={24} /><div><strong>GT-{String(item.id ?? '—').padStart(4, '0')}</strong><span>Record from MongoDB</span></div></div><div className="detail-fields">{fields.map(([label, value]) => <div key={label} className="detail-field"><span>{label}</span><strong>{value}</strong></div>)}</div>
-  <p className="modal-note">
-  <Activity size={15} />
-  This displays the equipment details stored in your GearTrack database.
-</p><button className="primary-button modal-done" onClick={onClose}>Done</button></section></div>;
+
+  return (
+    <div
+      className="modal-backdrop"
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <section
+        className="detail-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="detail-title"
+      >
+        <div className="modal-head">
+          <div>
+            <span className="modal-eyebrow">EQUIPMENT DETAILS</span>
+            <h2 id="detail-title">
+              {item.name || 'Equipment record'}
+            </h2>
+          </div>
+          <button
+            className="icon-button"
+            onClick={onClose}
+            aria-label="Close details"
+          >
+            <X size={19} />
+          </button>
+        </div>
+
+        <div className="detail-emblem">
+          <Boxes size={24} />
+          <div>
+            <strong>
+              GT-{String(item.id ?? '—').padStart(4, '0')}
+            </strong>
+            <span>Record from MongoDB</span>
+          </div>
+        </div>
+
+        <div className="detail-fields">
+          {fields.map(([label, value]) => (
+            <div key={label} className="detail-field">
+              <span>{label}</span>
+              <strong>{value}</strong>
+            </div>
+          ))}
+        </div>
+
+        <p className="modal-note">
+          <Activity size={15} />
+          This displays the equipment details stored in your GearTrack database.
+        </p>
+
+        <div className="edit-equipment-actions">
+          <button className="secondary-button" onClick={onClose}>
+            Close
+          </button>
+          <button
+            className="primary-button"
+            onClick={() => onEdit(item)}
+          >
+            Edit Equipment
+          </button>
+        </div>
+      </section>
+    </div>
+  );
 }
+
+
+function EditEquipmentModal({ item, onClose, onSave }) {
+  const [form, setForm] = useState({
+    name: '',
+    category: '',
+    quantity: '0',
+    item_condition: 'Good',
+    location: '',
+  });
+
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    if (!item) return;
+
+    setForm({
+      name: item.name || '',
+      category: item.category || '',
+      quantity: String(item.quantity ?? 0),
+      item_condition: item.item_condition || item.condition || 'Good',
+      location: item.location || '',
+    });
+
+    setError('');
+  }, [item]);
+
+  if (!item) return null;
+
+  const handleChange = (event) => {
+    setForm({
+      ...form,
+      [event.target.name]: event.target.value,
+    });
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    setError('');
+
+    const quantity = Number(form.quantity);
+
+    if (
+      !form.name.trim() ||
+      !form.category.trim() ||
+      !form.location.trim()
+    ) {
+      setError('Please complete all fields.');
+      return;
+    }
+
+    if (!Number.isInteger(quantity) || quantity < 0) {
+      setError('Quantity must be a whole number of 0 or higher.');
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      await onSave(item.id, {
+        name: form.name.trim(),
+        category: form.category.trim(),
+        quantity,
+        item_condition: form.item_condition,
+        location: form.location.trim(),
+      });
+
+      onClose();
+    } catch (err) {
+      setError(err.message || 'Failed to update equipment.');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="modal-backdrop">
+      <section
+        className="detail-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="edit-equipment-title"
+      >
+        <div className="modal-head">
+          <div>
+            <span className="modal-eyebrow">INVENTORY MANAGEMENT</span>
+            <h2 id="edit-equipment-title">Edit Equipment</h2>
+          </div>
+
+          <button
+            type="button"
+            className="icon-button"
+            onClick={onClose}
+            disabled={saving}
+          >
+            <X size={19} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit}>
+          <div className="edit-equipment-fields">
+            <label>
+              Equipment Name
+              <input
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                required
+              />
+            </label>
+
+            <label>
+              Category
+              <input
+                name="category"
+                value={form.category}
+                onChange={handleChange}
+                required
+              />
+            </label>
+
+            <label>
+              Quantity
+              <input
+                type="number"
+                name="quantity"
+                min="0"
+                step="1"
+                value={form.quantity}
+                onChange={handleChange}
+                required
+              />
+            </label>
+
+            <label>
+              Condition
+              <select
+                name="item_condition"
+                value={form.item_condition}
+                onChange={handleChange}
+                required
+              >
+                <option value="Good">Good</option>
+                <option value="Fair">Fair</option>
+                <option value="Needs Repair">Needs Repair</option>
+                <option value="Damaged">Damaged</option>
+              </select>
+            </label>
+
+            <label>
+              Location
+              <input
+                name="location"
+                value={form.location}
+                onChange={handleChange}
+                required
+              />
+            </label>
+          </div>
+
+          {error && (
+            <p role="alert" className="edit-error">
+              {error}
+            </p>
+          )}
+
+          <div className="edit-equipment-actions">
+            <button
+              type="button"
+              className="secondary-button"
+              onClick={onClose}
+              disabled={saving}
+            >
+              Cancel
+            </button>
+
+            <button
+              type="submit"
+              className="primary-button"
+              disabled={saving}
+            >
+              {saving ? 'Saving...' : 'Save Changes'}
+            </button>
+          </div>
+        </form>
+      </section>
+    </div>
+  );
+}
+
+
+function GraduationCapFallback() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="24"
+      height="24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="m2 9 10-5 10 5-10 5L2 9Z" />
+      <path d="M6 11v5c3.8 3 8.2 3 12 0v-5M22 9v6" />
+    </svg>
+  );
+}
+
 
 export default function App() {
   const [activePage, setActivePage] = useState('dashboard');
@@ -130,6 +426,7 @@ export default function App() {
   const [connected, setConnected] = useState(false);
   const [healthMessage, setHealthMessage] = useState('Checking backend connection');
   const [selectedItem, setSelectedItem] = useState(null);
+  const [editingItem, setEditingItem] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
 
@@ -183,6 +480,16 @@ export default function App() {
 
     await loadData(true);
   }, [loadData, selectedItem]);
+
+  // Update an existing equipment record.
+const handleUpdateEquipment = useCallback(async (id, updatedItem) => {
+  if (!id) {
+    throw new Error('Equipment ID is missing.');
+  }
+
+  await updateEquipment(id, updatedItem);
+  await loadData(true);
+}, [loadData]);
 
 
   const exportCsv = useCallback(() => {
@@ -325,27 +632,19 @@ export default function App() {
       </div>
     </main>
 
-    <DetailModal
+        <DetailModal
       item={selectedItem}
       onClose={() => setSelectedItem(null)}
+      onEdit={(item) => {
+        setSelectedItem(null);
+        setEditingItem(item);
+      }}
+    />
+
+    <EditEquipmentModal
+      item={editingItem}
+      onClose={() => setEditingItem(null)}
+      onSave={handleUpdateEquipment}
     />
   </div>;
-  function GraduationCapFallback() {
-  return (
-    <svg
-      viewBox="0 0 24 24"
-      width="24"
-      height="24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="m2 9 10-5 10 5-10 5L2 9Z" />
-      <path d="M6 11v5c3.8 3 8.2 3 12 0v-5M22 9v6" />
-    </svg>
-  );
-}
 }
